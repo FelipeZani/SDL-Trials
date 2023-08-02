@@ -6,6 +6,7 @@
 
 int main(int argc, char **argv) 
 {
+
     int Running = true;
     bool showMessage = true;
 
@@ -18,15 +19,23 @@ int main(int argc, char **argv)
     SDL_Window *window = SDL_CreateWindow("The useless app",SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480,
                               SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
-    SDL_Surface *image = IMG_Load("sprites/LeverSpriteSheet.png");
+    SDL_Surface *image = IMG_Load("sprites/LeverSpriteSheet(1).png");
+    SDL_Surface *imageLamp = IMG_Load("sprites/LampSpriteSheet(1).png");
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, image);
+    SDL_Texture * lampTexture = SDL_CreateTextureFromSurface(renderer, imageLamp);
     SDL_Event ev;
     SDL_Color Black = {0, 0, 0};
 
+    int nb_frame = 2;
+    int frameLeverWidth = image->w/nb_frame;
+    int frameLampWidth = imageLamp->w/nb_frame;
 
-    //Animation rectangles Initializers
-    SDL_Rect srcrect = { 0, 0, 280, 380 };
-    SDL_Rect dsrect = { 0, 0, 280, 380 };
+    //Animation Initializers
+    SDL_Rect srectlamp = { 0, 0, frameLampWidth, imageLamp->h };
+    SDL_Rect dsrectlamp = { 0, 100, frameLampWidth, imageLamp->h };
+    SDL_Rect srcrect = { 0, 0, frameLeverWidth, image->h };
+    SDL_Rect dsrect = { 0,dsrectlamp.y+150, frameLeverWidth, image->h };
+    
 
     Uint32 startTime = SDL_GetTicks(); // Record the start time
     const int frameTime = 10; // Time in milliseconds per frame
@@ -89,7 +98,7 @@ int main(int argc, char **argv)
     SDL_RenderCopy(renderer, Message, nullptr, &Message_rect);
     // Update the window
     SDL_RenderPresent(renderer);
-    SDL_Delay(100);
+ 
 
     while (Running) 
     {
@@ -112,10 +121,11 @@ int main(int argc, char **argv)
         Uint32 elapsedTime = SDL_GetTicks() - startTime;
 
         // Update the source rectangle to display the correct frame
-        srcrect.x = spriteFrame * 280;
-
+        srcrect.x = spriteFrame * frameLeverWidth;
+        srectlamp.x = spriteFrame * frameLampWidth;
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, texture, &srcrect, &dsrect);
+        SDL_RenderCopy(renderer, lampTexture, &srectlamp, &dsrectlamp);
         SDL_RenderCopy(renderer, Message, nullptr, &Message_rect);
         SDL_RenderPresent(renderer);
         
@@ -123,6 +133,7 @@ int main(int argc, char **argv)
 
     // Clean up and exit
     SDL_DestroyTexture(Message);
+    SDL_DestroyTexture(texture);
     SDL_FreeSurface(surfaceMessage);
     TTF_CloseFont(Sans);
     TTF_Quit();
